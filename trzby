@@ -1,49 +1,51 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stánek - Tržby</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Přehled tržeb</title>
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
     h1 { text-align: center; }
-    .sale { margin: 10px 0; }
-    .date { font-weight: bold; }
-    .amount { font-size: 1.2em; }
-    a { display: block; margin-top: 30px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
+    .date-block { margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    .date-block h2 { margin: 0 0 5px 0; }
+    .total { font-weight: bold; }
+    a { display: block; margin-top: 30px; text-align: center; text-decoration: none; color: blue; }
   </style>
 </head>
 <body>
-  <h1>Stánek - Tržby</h1>
+  <h1>📊 Přehled tržeb</h1>
+  <div id="sales-container"></div>
 
-  <div id="sales"></div>
-
-  <a href="index.html">🏠 Zpět na prodej</a>
+  <a href="index.html">⬅️ Zpět na prodej</a>
 
   <script>
     function loadSales() {
-      const sales = localStorage.getItem('sales');
-      return sales ? JSON.parse(sales) : {};
+      const raw = localStorage.getItem('sales');
+      return raw ? JSON.parse(raw) : {};
     }
 
     function renderSales() {
-      const salesDiv = document.getElementById('sales');
-      salesDiv.innerHTML = ''; // Clear previous content
+      const container = document.getElementById('sales-container');
       const sales = loadSales();
+      container.innerHTML = '';
 
       if (Object.keys(sales).length === 0) {
-        salesDiv.innerHTML = '<p>Žádné tržby nejsou uloženy.</p>';
-      } else {
-        Object.keys(sales).forEach(date => {
-          const div = document.createElement('div');
-          div.className = 'sale';
-          div.innerHTML = `
-            <div class="date">${date}</div>
-            <div class="amount">${sales[date].reduce((sum, sale) => sum + sale, 0)} Kč</div>
-          `;
-          salesDiv.appendChild(div);
-        });
+        container.innerHTML = '<p>Žádné tržby nejsou k dispozici.</p>';
+        return;
       }
+
+      Object.entries(sales).forEach(([date, list]) => {
+        const div = document.createElement('div');
+        div.className = 'date-block';
+        const sum = list.reduce((a, b) => a + b, 0);
+        div.innerHTML = `
+          <h2>${date}</h2>
+          <p>Počet prodejů: ${list.length}</p>
+          <p class="total">Celkem: ${sum} Kč</p>
+        `;
+        container.appendChild(div);
+      });
     }
 
     renderSales();
