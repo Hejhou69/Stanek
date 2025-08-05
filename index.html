@@ -9,10 +9,12 @@
     h1 { text-align: center; }
     .item { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; }
     .buttons { display: flex; gap: 5px; align-items: center; }
-    .buttons button { font-size: 2em; padding: 15px 20px; }
-    .total, .change { font-size: 1.3em; margin: 15px 0; }
-    input[type='number'], input[type='text'] { padding: 10px; font-size: 1em; width: 100%; }
-    button { padding: 10px 15px; font-size: 1em; margin: 5px 0; width: 100%; }
+    .buttons button { font-size: 1.5em; padding: 15px 20px; }
+    .total, .change { font-size: 1.2em; margin: 15px 0; }
+    .banknotes { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; }
+    .banknotes button { padding: 10px 15px; font-size: 1em; }
+    .controls { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+    button { padding: 8px 14px; font-size: 1em; }
     a { display: block; margin-top: 20px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
   </style>
 </head>
@@ -23,24 +25,41 @@
 
   <div class="total">Celkem: <span id="total">0</span> Kč</div>
 
-  <label>Zákazník platí:
-    <input type="tel" inputmode="numeric" id="paid" oninput="updateChange()">
-  </label>
+  <div>
+    <strong>Zákazník platí:</strong>
+    <div class="banknotes">
+      [10, 20, 50, 100, 200, 500, 1000, 2000].forEach(value => {
+        document.write(`<button onclick="addPaid(${value})">${value} Kč</button>`);
+      });
+    </div>
+    <div>Celkem zaplaceno: <span id="paid">0</span> Kč</div>
+  </div>
 
   <div class="change">Vrátit: <span id="change">0</span> Kč</div>
 
-  <button onclick="saveSale()">💾 Uložit</button>
-  <button onclick="resetAll()">🧹 Vymazat vše</button>
+  <div class="controls">
+    <button onclick="saveSale()">💾 Uložit</button>
+    <button onclick="resetAll()">🧹 Vymazat vše</button>
+  </div>
 
   <a href="admin.html">⚙️ Úprava nabídky</a>
   <a href="trzby.html">📈 Přehled tržeb</a>
 
   <script>
+    // Wrappery pro localStorage s prefixem
+    function gs(key) {
+      return localStorage.getItem('/Stanek_' + key);
+    }
+    function ss(key, value) {
+      localStorage.setItem('/Stanek_' + key, value);
+    }
+
     let products = [];
     let counts = [];
+    let paid = 0;
 
     function loadProducts() {
-      const stored = localStorage.getItem('products');
+      const stored = gs('products');
       if (stored) {
         products = JSON.parse(stored);
       } else {
@@ -95,8 +114,13 @@
       updateChange();
     }
 
+    function addPaid(amount) {
+      paid += amount;
+      document.getElementById('paid').innerText = paid;
+      updateChange();
+    }
+
     function updateChange() {
-      const paid = Number(document.getElementById('paid').value);
       const total = Number(document.getElementById('total').innerText);
       const change = paid - total;
       document.getElementById('change').innerText = change >= 0 ? change : 0;
@@ -104,28 +128,25 @@
 
     function resetAll() {
       counts = counts.map(() => 0);
+      paid = 0;
+      document.getElementById('paid').innerText = '0';
       products.forEach((_, i) => updateDisplay(i));
-      document.getElementById('paid').value = '';
       updateChange();
     }
 
     function saveSale() {
-      const total = counts.reduce((sum, count, i) => sum + count * products[i].price, 0);
-      if (total === 0) return;
+      const total = Number(document.getElementById('total').innerText);
+      if (total === 0) return alert('Nelze uložit prázdnou tržbu.');
 
       const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-      const stored = localStorage.getItem('sales') || '{}';
-      const sales = JSON.parse(stored);
+      let sales = JSON.parse(gs('sales') || '{}');
 
-      if (!sales[today]) {
-        sales[today] = [];
-      }
-
+      if (!sales[today]) sales[today] = [];
       sales[today].push(total);
-      localStorage.setItem('sales', JSON.stringify(sales));
+      ss('sales', JSON.stringify(sales));
 
+      alert('Tržba uložena.');
       resetAll();
-      alert("Prodej byl uložen.");
     }
 
     loadProducts();
