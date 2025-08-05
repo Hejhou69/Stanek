@@ -2,53 +2,91 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Přehled tržeb</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Tržby</title>
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
     h1 { text-align: center; }
-    .date-block { margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-    .date-block h2 { margin: 0 0 5px 0; }
-    .total { font-weight: bold; }
-    a { display: block; margin-top: 30px; text-align: center; text-decoration: none; color: blue; }
+    .item { margin: 10px 0; }
+    .buttons { display: flex; gap: 5px; }
+    button { padding: 5px 10px; font-size: 1em; }
+    .total { font-size: 1.2em; margin: 20px 0; }
+    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background-color: #f4f4f4; }
+    a { display: block; margin-top: 30px; text-align: center; font-size: 1em; color: blue; text-decoration: none; }
   </style>
 </head>
 <body>
-  <h1>📊 Přehled tržeb</h1>
-  <div id="sales-container"></div>
+  <h1>Tržby</h1>
 
-  <a href="index.html">⬅️ Zpět na prodej</a>
+  <div class="total">Celková tržba: <span id="totalAmount">0</span> Kč</div>
+
+  <h3>Seznam tržeb</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Datum</th>
+        <th>Tržba (Kč)</th>
+      </tr>
+    </thead>
+    <tbody id="salesTable"></tbody>
+  </table>
+
+  <div class="buttons">
+    <button onclick="clearSales()">Vymazat všechny tržby</button>
+  </div>
+
+  <a href="index.html">← Zpět na prodej</a>
 
   <script>
+    let sales = [];
+
     function loadSales() {
-      const raw = localStorage.getItem('sales');
-      return raw ? JSON.parse(raw) : {};
+      const stored = localStorage.getItem('sales');
+      if (stored) {
+        sales = JSON.parse(stored);
+      } else {
+        sales = [];
+      }
+      renderSales();
     }
 
     function renderSales() {
-      const container = document.getElementById('sales-container');
-      const sales = loadSales();
-      container.innerHTML = '';
-
-      if (Object.keys(sales).length === 0) {
-        container.innerHTML = '<p>Žádné tržby nejsou k dispozici.</p>';
-        return;
-      }
-
-      Object.entries(sales).forEach(([date, list]) => {
-        const div = document.createElement('div');
-        div.className = 'date-block';
-        const sum = list.reduce((a, b) => a + b, 0);
-        div.innerHTML = `
-          <h2>${date}</h2>
-          <p>Počet prodejů: ${list.length}</p>
-          <p class="total">Celkem: ${sum} Kč</p>
-        `;
-        container.appendChild(div);
+      const table = document.getElementById('salesTable');
+      table.innerHTML = '';
+      let total = 0;
+      sales.forEach(sale => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${sale.date}</td><td>${sale.amount} Kč</td>`;
+        table.appendChild(row);
+        total += sale.amount;
       });
+      document.getElementById('totalAmount').innerText = total;
     }
 
-    renderSales();
+    function saveSale(amount) {
+      const date = new Date().toLocaleString();
+      sales.push({ date, amount });
+      localStorage.setItem('sales', JSON.stringify(sales));
+      renderSales();
+    }
+
+    function clearSales() {
+      localStorage.removeItem('sales');
+      sales = [];
+      renderSales();
+    }
+
+    function addSaleFromIndex() {
+      const totalAmount = Number(localStorage.getItem('totalAmount'));
+      if (totalAmount && totalAmount > 0) {
+        saveSale(totalAmount);
+      }
+    }
+
+    loadSales();
+    addSaleFromIndex();
   </script>
 </body>
 </html>
