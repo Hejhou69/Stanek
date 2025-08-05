@@ -1,24 +1,38 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Stánek - Prodej</title>
   
   <!-- Odkaz na manifest.json pro PWA -->
   <link rel="manifest" href="/manifest.json">
-  
+
+  <!-- PWA ikony a základní styl -->
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
     h1 { text-align: center; }
     .item { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; }
     .buttons { display: flex; gap: 5px; align-items: center; }
-    .buttons button { font-size: 1.5em; padding: 10px 15px; }
-    .total, .change { font-size: 1.2em; margin: 15px 0; }
+    .buttons button { font-size: 2em; padding: 10px 15px; }
+    .total, .change { font-size: 1.5em; margin: 15px 0; }
     input[type='number'], input[type='text'] { padding: 5px; font-size: 1em; }
     button { padding: 5px 10px; font-size: 1em; }
     a { display: block; margin-top: 30px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
   </style>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js').then((registration) => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        }).catch((error) => {
+          console.log('Service Worker registration failed:', error);
+        });
+      });
+    }
+  </script>
 </head>
 <body>
   <h1>Stánek - Prodej</h1>
@@ -28,7 +42,7 @@
   <div class="total">Celkem: <span id="total">0</span> Kč</div>
 
   <label>Zákazník platí:
-    <input type="number" id="paid" min="0" oninput="updateChange()">
+    <input type="number" id="paid" min="0" oninput="updateChange()" inputmode="numeric" pattern="\d*">
   </label>
 
   <div class="change">Vrátit: <span id="change">0</span> Kč</div>
@@ -37,7 +51,7 @@
 
   <a href="admin.html">⚙️ Úprava nabídky</a>
 
-  <a href="trzby.html">📊 Tržby</a> <!-- Odkaz na tržby -->
+  <a href="trzby.html">📊 Tržby</a>
 
   <script>
     let products = [];
