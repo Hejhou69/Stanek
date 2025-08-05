@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Stánek - Prodej</title>
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
@@ -11,9 +11,9 @@
     .buttons { display: flex; gap: 5px; align-items: center; }
     .buttons button { font-size: 1.5em; padding: 10px 15px; }
     .total, .change { font-size: 1.2em; margin: 15px 0; }
-    input[type='number'], input[type='text'] { padding: 5px; font-size: 1em; }
+    input[type='number'] { padding: 5px; font-size: 1em; width: 100%; }
     button { padding: 5px 10px; font-size: 1em; }
-    a { display: block; margin-top: 30px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
+    a { display: block; margin-top: 20px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
   </style>
 </head>
 <body>
@@ -24,7 +24,7 @@
   <div class="total">Celkem: <span id="total">0</span> Kč</div>
 
   <label>Zákazník platí:
-    <input type="number" id="paid" min="0" oninput="updateChange()">
+    <input type="tel" id="paid" inputmode="numeric" pattern="[0-9]*" oninput="updateChange()" />
   </label>
 
   <div class="change">Vrátit: <span id="change">0</span> Kč</div>
@@ -33,7 +33,6 @@
   <button onclick="saveSale()">Uložit tržbu</button>
 
   <a href="trzby.html">📊 Zobrazit tržby</a>
-
   <a href="admin.html">⚙️ Úprava nabídky</a>
 
   <script>
@@ -113,27 +112,16 @@
     function saveSale() {
       const total = Number(document.getElementById('total').innerText);
       if (total > 0) {
-        const sales = loadSales();
+        const sales = JSON.parse(localStorage.getItem('sales') || '{}');
         const today = new Date().toLocaleDateString('cs-CZ');
-        if (!sales[today]) {
-          sales[today] = [];
-        }
+        if (!sales[today]) sales[today] = [];
         sales[today].push(total);
-        saveSales(sales);
+        localStorage.setItem('sales', JSON.stringify(sales));
         alert("Tržba byla uložena!");
-        resetAll(); // Vymaže vše po uložení tržby
+        resetAll();
       } else {
         alert("Žádná tržba k uložení.");
       }
-    }
-
-    function loadSales() {
-      const sales = localStorage.getItem('sales');
-      return sales ? JSON.parse(sales) : {};
-    }
-
-    function saveSales(sales) {
-      localStorage.setItem('sales', JSON.stringify(sales));
     }
 
     loadProducts();
