@@ -1,92 +1,59 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Tržby</title>
+  <link rel="manifest" href="/manifest.json">
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
     h1 { text-align: center; }
-    .item { margin: 10px 0; }
-    .buttons { display: flex; gap: 5px; }
-    button { padding: 5px 10px; font-size: 1em; }
-    .total { font-size: 1.2em; margin: 20px 0; }
-    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background-color: #f4f4f4; }
-    a { display: block; margin-top: 30px; text-align: center; font-size: 1em; color: blue; text-decoration: none; }
+    .transaction { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+    button { font-size: 1em; padding: 10px; }
   </style>
 </head>
 <body>
   <h1>Tržby</h1>
 
-  <div class="total">Celková tržba: <span id="totalAmount">0</span> Kč</div>
+  <div id="transactions"></div>
 
-  <h3>Seznam tržeb</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Datum</th>
-        <th>Tržba (Kč)</th>
-      </tr>
-    </thead>
-    <tbody id="salesTable"></tbody>
-  </table>
+  <button onclick="clearAll()">Vymazat tržby</button>
 
-  <div class="buttons">
-    <button onclick="clearSales()">Vymazat všechny tržby</button>
-  </div>
-
-  <a href="index.html">← Zpět na prodej</a>
+  <a href="index.html">Zpět na prodej</a>
 
   <script>
-    let sales = [];
-
-    function loadSales() {
-      const stored = localStorage.getItem('sales');
+    function loadTransactions() {
+      const stored = localStorage.getItem('transactions');
       if (stored) {
-        sales = JSON.parse(stored);
-      } else {
-        sales = [];
+        return JSON.parse(stored);
       }
-      renderSales();
+      return [];
     }
 
-    function renderSales() {
-      const table = document.getElementById('salesTable');
-      table.innerHTML = '';
-      let total = 0;
-      sales.forEach(sale => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${sale.date}</td><td>${sale.amount} Kč</td>`;
-        table.appendChild(row);
-        total += sale.amount;
+    function renderTransactions() {
+      const transactions = loadTransactions();
+      const transactionsDiv = document.getElementById('transactions');
+      transactionsDiv.innerHTML = '';
+      transactions.forEach((transaction, index) => {
+        const div = document.createElement('div');
+        div.className = 'transaction';
+        div.innerHTML = `
+          <p>Datum: ${transaction.date}</p>
+          <p>Celkem: ${transaction.total} Kč</p>
+          <p>Zaplatil: ${transaction.paid} Kč</p>
+          <p>Vrátit: ${transaction.change} Kč</p>
+        `;
+        transactionsDiv.appendChild(div);
       });
-      document.getElementById('totalAmount').innerText = total;
     }
 
-    function saveSale(amount) {
-      const date = new Date().toLocaleString();
-      sales.push({ date, amount });
-      localStorage.setItem('sales', JSON.stringify(sales));
-      renderSales();
+    function clearAll() {
+      localStorage.removeItem('transactions');
+      renderTransactions();
+      alert('Tržby byly vymazány!');
     }
 
-    function clearSales() {
-      localStorage.removeItem('sales');
-      sales = [];
-      renderSales();
-    }
-
-    function addSaleFromIndex() {
-      const totalAmount = Number(localStorage.getItem('totalAmount'));
-      if (totalAmount && totalAmount > 0) {
-        saveSale(totalAmount);
-      }
-    }
-
-    loadSales();
-    addSaleFromIndex();
+    renderTransactions();
   </script>
 </body>
 </html>
