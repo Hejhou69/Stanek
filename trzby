@@ -38,10 +38,11 @@
   </div>
 
   <script>
-    // Storage helpers
+    // Helper functions to handle localStorage
     function gs(key) {
       return localStorage.getItem('/Stanek_' + key);
     }
+
     function ss(key, value) {
       localStorage.setItem('/Stanek_' + key, value);
     }
@@ -103,6 +104,17 @@
       link.href = URL.createObjectURL(blob);
       link.download = 'trzby.csv';
       link.click();
+    }
+
+    function saveSale(total) {
+      const sales = loadSales();
+      const today = new Date().toLocaleDateString('cs-CZ');
+      if (!sales[today]) {
+        sales[today] = [];
+      }
+      sales[today].push(total);
+      ss('sales', JSON.stringify(sales));
+      renderSales();
     }
 
     renderSales();
