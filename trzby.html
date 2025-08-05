@@ -6,78 +6,48 @@
   <meta name="theme-color" content="#000000">
   <link rel="icon" href="/icon-192x192.png">
   <link rel="manifest" href="/manifest.json">
-  <title>Stánek - Tržby</title>
+  <title>Stánek - Historie tržeb</title>
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
     h1 { text-align: center; }
-    .history { margin-top: 20px; }
-    .item { margin-bottom: 10px; }
-    .total { margin-top: 20px; font-size: 1.2em; }
-    button { padding: 10px 20px; font-size: 1em; width: 100%; margin-top: 20px; }
+    .entry { margin-bottom: 10px; }
   </style>
 </head>
 <body>
   <h1>Historie tržeb</h1>
 
-  <div class="history" id="history"></div>
-
-  <div class="total">
-    Celková tržba za dnešní den: <span id="total-amount">0</span> Kč
-  </div>
-
-  <button onclick="saveRevenue()">Uložit tržbu</button>
+  <div id="history"></div>
+  
   <button onclick="clearHistory()">Vymazat historii</button>
 
+  <a href="index.html">← Návrat na hlavní stránku</a>
+
   <script>
-    let salesHistory = [];
-
     function loadHistory() {
-      const storedHistory = localStorage.getItem('salesHistory');
-      if (storedHistory) {
-        salesHistory = JSON.parse(storedHistory);
-      }
-    }
-
-    function displayHistory() {
+      const history = JSON.parse(localStorage.getItem('salesHistory')) || [];
       const historyDiv = document.getElementById('history');
       historyDiv.innerHTML = '';
-      let total = 0;
-
-      salesHistory.forEach(entry => {
-        if (entry.total > 0) {
-          const div = document.createElement('div');
-          div.className = 'item';
-          div.innerHTML = `
-            ${entry.date}: <strong>${entry.total}</strong> Kč
-          `;
-          historyDiv.appendChild(div);
-          total += entry.total;
-        }
+      let totalDay = 0;
+      history.forEach(entry => {
+        totalDay += entry.total;
+        const div = document.createElement('div');
+        div.className = 'entry';
+        div.innerHTML = `Datum: ${entry.date}<br>Celková tržba: ${entry.total} Kč<br>Zaplatil: ${entry.paid} Kč<br>Vrátit: ${entry.change} Kč`;
+        historyDiv.appendChild(div);
       });
-
-      document.getElementById('total-amount').innerText = total;
-    }
-
-    function saveRevenue() {
-      const date = new Date().toLocaleDateString();
-      const total = Number(document.getElementById('total').innerText);
-      
-      if (total > 0) {
-        salesHistory.push({ date, total });
-        localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
-        alert('Tržby byly uloženy!');
-        displayHistory();
-      }
+      const totalDiv = document.createElement('div');
+      totalDiv.innerHTML = `<strong>Celková tržba za celý den: ${totalDay} Kč</strong>`;
+      historyDiv.appendChild(totalDiv);
     }
 
     function clearHistory() {
-      salesHistory = [];
-      localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
-      displayHistory();
+      if (confirm('Opravu chcete vymazat celou historii tržeb?')) {
+        localStorage.removeItem('salesHistory');
+        loadHistory();
+      }
     }
 
     loadHistory();
-    displayHistory();
   </script>
 </body>
 </html>
