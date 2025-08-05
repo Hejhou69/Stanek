@@ -1,7 +1,7 @@
 {
-  "name": "Stánek - Prodej",
-  "short_name": "Stánek",
-  "description": "Aplikace pro prodej na stánku - sledování tržeb, produkty a ceny.",
+  "name": "Stánek Prodej",
+  "short_name": "Prodej",
+  "description": "Prodejní aplikace pro stánek",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
