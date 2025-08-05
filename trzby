@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stánek - Tržby</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    h1 { text-align: center; }
+    .day { margin: 15px 0; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
+    .day h3 { margin: 0 0 10px 0; }
+    ul { list-style: none; padding-left: 0; }
+    li { margin-bottom: 5px; }
+    .total { font-weight: bold; margin-top: 10px; }
+    button { margin-top: 10px; padding: 5px 10px; font-size: 0.9em; }
+    a { display: block; margin-top: 30px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
+  </style>
+</head>
+<body>
+  <h1>📈 Přehled tržeb</h1>
+  <div id="sales-container"></div>
+  <a href="index.html">← Zpět na prodej</a>
+
+  <script>
+    function renderSales() {
+      const container = document.getElementById('sales-container');
+      container.innerHTML = '';
+
+      const stored = localStorage.getItem('sales');
+      if (!stored) {
+        container.innerHTML = '<p>Žádné tržby zatím nejsou uloženy.</p>';
+        return;
+      }
+
+      const sales = JSON.parse(stored);
+      const days = Object.keys(sales).sort().reverse(); // Nejnovější první
+
+      if (days.length === 0) {
+        container.innerHTML = '<p>Žádné tržby zatím nejsou uloženy.</p>';
+        return;
+      }
+
+      days.forEach(day => {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'day';
+
+        const amounts = sales[day];
+        const sum = amounts.reduce((a, b) => a + b, 0);
+
+        dayDiv.innerHTML = `
+          <h3>${day}</h3>
+          <ul>
+            ${amounts.map(a => `<li>${a} Kč</li>`).join('')}
+          </ul>
+          <div class="total">Součet: ${sum} Kč</div>
+          <button onclick="deleteDay('${day}')">🗑️ Smazat den</button>
+        `;
+
+        container.appendChild(dayDiv);
+      });
+    }
+
+    function deleteDay(day) {
+      if (!confirm(`Opravdu chceš smazat tržby za ${day}?`)) return;
+      const stored = localStorage.getItem('sales');
+      if (!stored) return;
+      const sales = JSON.parse(stored);
+      delete sales[day];
+      localStorage.setItem('sales', JSON.stringify(sales));
+      renderSales();
+    }
+
+    renderSales();
+  </script>
+</body>
+</html>
