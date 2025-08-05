@@ -8,7 +8,7 @@
   <link rel="manifest" href="/manifest.json">
   <title>Stánek - Prodej</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; box-sizing: border-box; }
     h1 { text-align: center; }
     .item { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; }
     .buttons { display: flex; gap: 5px; }
@@ -17,8 +17,12 @@
     input[type='number'] { padding: 5px; font-size: 1em; width: 100%; }
     button { padding: 10px 20px; font-size: 1em; width: 100%; margin-top: 20px; }
     a { display: block; margin-top: 30px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
+
+    /* Upravený styl pro mobilní zobrazení */
     @media (max-width: 500px) {
-      .buttons button { font-size: 1.5em; padding: 10px 15px; }
+      .buttons button { font-size: 1.5em; padding: 8px 12px; }
+      button { font-size: 1.1em; padding: 15px; }
+      input[type='number'] { font-size: 1.2em; }
     }
   </style>
 </head>
@@ -39,6 +43,7 @@
   <button onclick="resetAll()">Vymazat vše</button>
 
   <a href="admin.html">⚙️ Úprava nabídky</a>
+  <a href="trzby.html">🧾 Historie tržeb</a>
 
   <script>
     let products = [];
