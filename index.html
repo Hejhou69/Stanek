@@ -9,8 +9,9 @@
     h1 { text-align: center; }
     .item { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; }
     .buttons { display: flex; gap: 5px; align-items: center; }
+    .buttons button { font-size: 1.5em; padding: 10px 15px; }
     .total, .change { font-size: 1.2em; margin: 15px 0; }
-    input[type='number'] { padding: 5px; font-size: 1em; }
+    input[type='number'], input[type='text'] { padding: 5px; font-size: 1em; }
     button { padding: 5px 10px; font-size: 1em; }
     a { display: block; margin-top: 30px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
   </style>
@@ -23,25 +24,33 @@
   <div class="total">Celkem: <span id="total">0</span> Kč</div>
 
   <label>Zákazník platí:
-    <input type="number" id="paid" min="0" oninput="updateChange()">
+    <input type="text" id="paid" pattern="^(10|20|50|100|200|500|1000)$" oninput="updateChange()">
   </label>
 
   <div class="change">Vrátit: <span id="change">0</span> Kč</div>
 
   <button onclick="resetAll()">Vymazat vše</button>
 
-  <a href="admin.html">🔧 Úprava nabídky</a>
+  <a href="admin.html">⚙️ Úprava nabídky</a>
 
   <script>
-    let products = [
-      { name: "Pivo", price: 35 },
-      { name: "Kofola", price: 25 },
-      { name: "Nealko pivo", price: 30 },
-      { name: "Křupky", price: 20 },
-      { name: "Fruko", price: 15 }
-    ];
-
+    let products = [];
     let counts = [];
+
+    function loadProducts() {
+      const stored = localStorage.getItem('products');
+      if (stored) {
+        products = JSON.parse(stored);
+      } else {
+        products = [
+          { name: "Pivo", price: 35 },
+          { name: "Kofola", price: 25 },
+          { name: "Nealko pivo", price: 30 },
+          { name: "Křupky", price: 20 },
+          { name: "Fruko", price: 15 }
+        ];
+      }
+    }
 
     function renderItems() {
       const itemsDiv = document.getElementById('items');
@@ -98,6 +107,7 @@
       updateChange();
     }
 
+    loadProducts();
     renderItems();
   </script>
 </body>
