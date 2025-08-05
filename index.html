@@ -42,7 +42,6 @@
   <button onclick="saveSale()">Uložit tržbu</button>
   <button onclick="resetAll()">Vymazat vše</button>
 
-  <!-- Opravený odkaz na historickou stránku tržeb -->
   <a href="trzby.html">🧾 Historie tržeb</a>
   
   <a href="admin.html">⚙️ Úprava nabídky</a>
@@ -122,7 +121,8 @@
           total,
           paid,
           change: paid - total,
-          date: new Date().toLocaleString()
+          date: new Date().toLocaleString(),
+          soldItems: counts
         };
         let salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
         salesHistory.push(sale);
