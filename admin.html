@@ -12,8 +12,7 @@
     h1 { text-align: center; }
     .item { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; }
     .item input { width: 70px; padding: 5px; font-size: 1em; }
-    button { padding: 5px 10px; font-size: 1em; }
-    .save-button { margin-top: 20px; }
+    button { padding: 10px 20px; font-size: 1em; margin-top: 20px; }
   </style>
 </head>
 <body>
@@ -21,9 +20,9 @@
 
   <div id="items"></div>
 
-  <button class="save-button" onclick="saveProducts()">Uložit změny</button>
-  <button class="save-button" onclick="addNewProduct()">Přidat produkt</button>
-  <button class="save-button" onclick="deleteProduct()">Smazat produkt</button>
+  <button onclick="saveProducts()">Uložit změny</button>
+  <button onclick="addNewProduct()">Přidat produkt</button>
+  <button onclick="deleteProduct()">Smazat produkt</button>
 
   <br>
   <a href="index.html">← Návrat na hlavní stránku</a>
@@ -82,10 +81,12 @@
     }
 
     function deleteProduct() {
-      const name = prompt("Zadejte název produktu, který chcete smazat:");
-      products = products.filter(product => product.name !== name);
-      localStorage.setItem('products', JSON.stringify(products));
-      renderItems();
+      const index = prompt("Zadejte číslo produktu, který chcete smazat (1 až " + products.length + "):");
+      if (index && index > 0 && index <= products.length) {
+        products.splice(index - 1, 1);
+        localStorage.setItem('products', JSON.stringify(products));
+        renderItems();
+      }
     }
 
     loadProducts();
