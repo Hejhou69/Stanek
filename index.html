@@ -24,12 +24,13 @@
   <div class="total">Celkem: <span id="total">0</span> Kč</div>
 
   <label>Zákazník platí:
-    <input type="number" id="paid" min="0" inputmode="numeric" oninput="updateChange()">
+    <input type="number" id="paid" min="0" oninput="updateChange()">
   </label>
 
   <div class="change">Vrátit: <span id="change">0</span> Kč</div>
 
   <button onclick="resetAll()">Vymazat vše</button>
+  <button onclick="saveSale()">Uložit tržbu</button>
 
   <a href="admin.html">⚙️ Úprava nabídky</a>
 
@@ -105,6 +106,31 @@
       products.forEach((_, i) => updateDisplay(i));
       document.getElementById('paid').value = '';
       updateChange();
+    }
+
+    function saveSale() {
+      const total = Number(document.getElementById('total').innerText);
+      if (total > 0) {
+        const sales = loadSales();
+        const today = new Date().toLocaleDateString('cs-CZ');
+        if (!sales[today]) {
+          sales[today] = [];
+        }
+        sales[today].push(total);
+        saveSales(sales);
+        alert("Tržba byla uložena!");
+      } else {
+        alert("Žádná tržba k uložení.");
+      }
+    }
+
+    function loadSales() {
+      const sales = localStorage.getItem('sales');
+      return sales ? JSON.parse(sales) : {};
+    }
+
+    function saveSales(sales) {
+      localStorage.setItem('sales', JSON.stringify(sales));
     }
 
     loadProducts();
