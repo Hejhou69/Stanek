@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#000000">
   <link rel="icon" href="/icon-192x192.png">
   <link rel="manifest" href="/manifest.json">
@@ -12,11 +12,14 @@
     h1 { text-align: center; }
     .item { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; }
     .buttons { display: flex; gap: 5px; align-items: center; }
-    .buttons button { font-size: 1.5em; padding: 10px 15px; }
+    .buttons button { font-size: 2em; padding: 10px 15px; }
     .total, .change { font-size: 1.2em; margin: 15px 0; }
-    input[type='number'], input[type='text'] { padding: 5px; font-size: 1em; }
-    button { padding: 5px 10px; font-size: 1em; }
+    input[type='number'], input[type='text'] { padding: 5px; font-size: 1em; width: 100%; }
+    button { padding: 10px 20px; font-size: 1em; width: 100%; }
     a { display: block; margin-top: 30px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
+    @media (max-width: 500px) {
+      .buttons button { font-size: 1.5em; padding: 10px 15px; }
+    }
   </style>
 </head>
 <body>
@@ -27,16 +30,14 @@
   <div class="total">Celkem: <span id="total">0</span> Kč</div>
 
   <label>Zákazník platí:
-    <input type="number" id="paid" min="0" oninput="updateChange()" inputmode="numeric">
+    <input type="number" id="paid" min="0" oninput="updateChange()" inputmode="numeric" />
   </label>
 
   <div class="change">Vrátit: <span id="change">0</span> Kč</div>
 
-  <button onclick="saveSale()">Uložit tržbu</button>
   <button onclick="resetAll()">Vymazat vše</button>
 
   <a href="admin.html">⚙️ Úprava nabídky</a>
-  <a href="trzby.html">📈 Historie tržeb</a>
 
   <script>
     let products = [];
@@ -112,33 +113,8 @@
       updateChange();
     }
 
-    function saveSale() {
-      const saleData = {
-        date: new Date().toISOString().split('T')[0],
-        items: products.map((product, i) => ({ name: product.name, count: counts[i] })),
-        total: Number(document.getElementById('total').innerText)
-      };
-      const history = JSON.parse(localStorage.getItem('salesHistory')) || [];
-      history.push(saleData);
-      localStorage.setItem('salesHistory', JSON.stringify(history));
-
-      // Reset after saving the sale
-      resetAll();
-      alert('Tržba byla uložena!');
-    }
-
     loadProducts();
     renderItems();
-  </script>
-  
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js').then((registration) => {
-        console.log('Service Worker registered with scope:', registration.scope);
-      }).catch((error) => {
-        console.log('Service Worker registration failed:', error);
-      });
-    }
   </script>
 </body>
 </html>
