@@ -2,31 +2,29 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Správa nabídky</title>
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
     h1 { text-align: center; }
-    input, button { margin: 5px 0; padding: 5px; font-size: 1em; width: 100%; }
-    .product { display: flex; justify-content: space-between; margin: 5px 0; }
-    .product span { flex: 1; }
-    .product button { margin-left: 10px; }
-    a { display: block; margin-top: 20px; text-align: center; color: blue; text-decoration: none; }
+    .item { display: flex; align-items: center; justify-content: space-between; margin: 10px 0; }
+    .item input { margin: 0 5px; }
+    .buttons { display: flex; gap: 5px; }
+    button { padding: 5px 10px; font-size: 1em; }
+    a { display: block; margin-top: 30px; text-align: center; font-size: 1em; color: blue; text-decoration: none; }
   </style>
 </head>
 <body>
-  <h1>Úprava nabídky</h1>
+  <h1>Správa nabídky</h1>
 
-  <div id="product-list"></div>
+  <div id="products"></div>
 
-  <h2>Přidat položku</h2>
+  <h3>Přidat nový produkt</h3>
   <input type="text" id="newName" placeholder="Název" />
   <input type="number" id="newPrice" placeholder="Cena" />
   <button onclick="addProduct()">Přidat</button>
 
-  <button onclick="resetProducts()">Obnovit výchozí nabídku</button>
-
-  <a href="index.html">⬅️ Zpět na prodej</a>
+  <a href="index.html">← Zpět na prodej</a>
 
   <script>
     let products = [];
@@ -43,44 +41,76 @@
           { name: "Křupky", price: 20 },
           { name: "Fruko", price: 15 }
         ];
+        localStorage.setItem('products', JSON.stringify(products));
       }
+    }
+
+    function saveProducts() {
+      localStorage.setItem('products', JSON.stringify(products));
       renderProducts();
     }
 
     function renderProducts() {
-      const list = document.getElementById('product-list');
-      list.innerHTML = '';
-      products.forEach((p, i) => {
+      const container = document.getElementById('products');
+      container.innerHTML = '';
+      products.forEach((product, index) => {
         const div = document.createElement('div');
-        div.className = 'product';
-        div.innerHTML = `<span>${p.name} - ${p.price} Kč</span><button onclick="deleteProduct(${i})">🗑️</button>`;
-        list.appendChild(div);
+        div.className = 'item';
+        div.innerHTML = `
+          <input type="text" value="${product.name}" onchange="updateName(${index}, this.value)" />
+          <input type="number" value="${product.price}" onchange="updatePrice(${index}, this.value)" />
+          <div class="buttons">
+            <button onclick="moveUp(${index})">🔼</button>
+            <button onclick="moveDown(${index})">🔽</button>
+            <button onclick="removeProduct(${index})">🗑️</button>
+          </div>
+        `;
+        container.appendChild(div);
       });
-      localStorage.setItem('products', JSON.stringify(products));
+    }
+
+    function updateName(index, value) {
+      products[index].name = value;
+      saveProducts();
+    }
+
+    function updatePrice(index, value) {
+      products[index].price = Number(value);
+      saveProducts();
     }
 
     function addProduct() {
       const name = document.getElementById('newName').value.trim();
-      const price = parseFloat(document.getElementById('newPrice').value);
-      if (name && !isNaN(price)) {
+      const price = Number(document.getElementById('newPrice').value);
+      if (name && price > 0) {
         products.push({ name, price });
-        renderProducts();
         document.getElementById('newName').value = '';
         document.getElementById('newPrice').value = '';
+        saveProducts();
       }
     }
 
-    function deleteProduct(index) {
+    function removeProduct(index) {
       products.splice(index, 1);
-      renderProducts();
+      saveProducts();
     }
 
-    function resetProducts() {
-      localStorage.removeItem('products');
-      loadProducts();
+    function moveUp(index) {
+      if (index > 0) {
+        [products[index - 1], products[index]] = [products[index], products[index - 1]];
+        saveProducts();
+      }
+    }
+
+    function moveDown(index) {
+      if (index < products.length - 1) {
+        [products[index + 1], products[index]] = [products[index], products[index + 1]];
+        saveProducts();
+      }
     }
 
     loadProducts();
+    renderProducts();
   </script>
 </body>
 </html>
