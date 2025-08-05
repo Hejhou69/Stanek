@@ -3,24 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Úprava nabídky</title>
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="/icon-192x192.png">
+  <link rel="manifest" href="/manifest.json">
+  <title>Stánek - Úprava nabídky</title>
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
     h1 { text-align: center; }
     .item { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; }
-    .buttons { display: flex; gap: 5px; align-items: center; }
-    input[type="text"], input[type="number"] { padding: 5px; font-size: 1em; width: 80%; }
+    .item input { width: 70px; padding: 5px; font-size: 1em; }
     button { padding: 5px 10px; font-size: 1em; }
-    a { display: block; margin-top: 30px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
+    .save-button { margin-top: 20px; }
   </style>
 </head>
 <body>
-  <h1>Admin - Úprava nabídky</h1>
+  <h1>Úprava nabídky</h1>
 
   <div id="items"></div>
 
-  <button onclick="saveChanges()">Uložit změny</button>
-  <a href="index.html">← zpět</a>
+  <button class="save-button" onclick="saveProducts()">Uložit změny</button>
 
   <script>
     let products = [];
@@ -47,25 +48,36 @@
         const div = document.createElement('div');
         div.className = 'item';
         div.innerHTML = `
-          <input type="text" value="${product.name}" id="name-${index}">
-          <input type="number" value="${product.price}" id="price-${index}">
+          <span>${product.name}</span>
+          <input type="number" id="price-${index}" value="${product.price}" min="0">
         `;
         itemsDiv.appendChild(div);
       });
     }
 
-    function saveChanges() {
-      products = products.map((product, index) => {
-        return {
-          name: document.getElementById(`name-${index}`).value,
-          price: Number(document.getElementById(`price-${index}`).value)
-        };
+    function saveProducts() {
+      products.forEach((product, index) => {
+        const newPrice = Number(document.getElementById(`price-${index}`).value);
+        if (!isNaN(newPrice) && newPrice >= 0) {
+          product.price = newPrice;
+        }
       });
       localStorage.setItem('products', JSON.stringify(products));
+      alert('Změny byly uloženy!');
     }
 
     loadProducts();
     renderItems();
+  </script>
+  
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js').then((registration) => {
+        console.log('Service Worker registered with scope:', registration.scope);
+      }).catch((error) => {
+        console.log('Service Worker registration failed:', error);
+      });
+    }
   </script>
 </body>
 </html>
