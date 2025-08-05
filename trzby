@@ -3,118 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Přehled tržeb</title>
+  <title>Stánek - Tržby</title>
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
     h1 { text-align: center; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    table, th, td { border: 1px solid #ddd; }
-    th, td { padding: 10px; text-align: center; }
-    th { background-color: #f2f2f2; }
-    button { padding: 10px 15px; font-size: 1em; }
-    .controls { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+    .sale { margin: 10px 0; }
+    .date { font-weight: bold; }
+    .amount { font-size: 1.2em; }
+    a { display: block; margin-top: 30px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
   </style>
 </head>
 <body>
-  <h1>Přehled tržeb</h1>
+  <h1>Stánek - Tržby</h1>
 
-  <table id="salesTable">
-    <thead>
-      <tr>
-        <th>Datum</th>
-        <th>Tržba (Kč)</th>
-        <th>Akce</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Tržby se zde dynamicky načítají -->
-    </tbody>
-  </table>
+  <div id="sales"></div>
 
-  <div class="controls">
-    <button onclick="resetAllSales()">🧹 Vymazat tržby</button>
-    <button onclick="exportCSV()">📄 Export do CSV</button>
-    <a href="index.html">↩️ Zpět na prodej</a>
-  </div>
+  <a href="index.html">🏠 Zpět na prodej</a>
 
   <script>
-    // Helper functions to handle localStorage
-    function gs(key) {
-      return localStorage.getItem('/Stanek_' + key);
-    }
-
-    function ss(key, value) {
-      localStorage.setItem('/Stanek_' + key, value);
-    }
-
     function loadSales() {
-      const sales = gs('sales');
+      const sales = localStorage.getItem('sales');
       return sales ? JSON.parse(sales) : {};
     }
 
     function renderSales() {
+      const salesDiv = document.getElementById('sales');
+      salesDiv.innerHTML = ''; // Clear previous content
       const sales = loadSales();
-      const tbody = document.getElementById('salesTable').getElementsByTagName('tbody')[0];
-      tbody.innerHTML = '';
 
-      for (let date in sales) {
-        sales[date].forEach(sale => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${date}</td>
-            <td>${sale} Kč</td>
-            <td><button onclick="deleteSale('${date}', ${sale})">🗑️ Smazat</button></td>
-          `;
-          tbody.appendChild(row);
-        });
-      }
-    }
-
-    function resetAllSales() {
-      if (confirm('Opravdu chcete vymazat všechny tržby?')) {
-        ss('sales', JSON.stringify({}));
-        renderSales();
-      }
-    }
-
-    function deleteSale(date, sale) {
-      const sales = loadSales();
-      const updatedSales = sales[date].filter(s => s !== sale);
-      if (updatedSales.length === 0) {
-        delete sales[date];
+      if (Object.keys(sales).length === 0) {
+        salesDiv.innerHTML = '<p>Žádné tržby nejsou uloženy.</p>';
       } else {
-        sales[date] = updatedSales;
-      }
-      ss('sales', JSON.stringify(sales));
-      renderSales();
-    }
-
-    function exportCSV() {
-      const sales = loadSales();
-      let csvContent = "Datum,Tržba (Kč)\n";
-      
-      for (let date in sales) {
-        sales[date].forEach(sale => {
-          csvContent += `${date},${sale}\n`;
+        Object.keys(sales).forEach(date => {
+          const div = document.createElement('div');
+          div.className = 'sale';
+          div.innerHTML = `
+            <div class="date">${date}</div>
+            <div class="amount">${sales[date].reduce((sum, sale) => sum + sale, 0)} Kč</div>
+          `;
+          salesDiv.appendChild(div);
         });
       }
-      
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'trzby.csv';
-      link.click();
-    }
-
-    function saveSale(total) {
-      const sales = loadSales();
-      const today = new Date().toLocaleDateString('cs-CZ');
-      if (!sales[today]) {
-        sales[today] = [];
-      }
-      sales[today].push(total);
-      ss('sales', JSON.stringify(sales));
-      renderSales();
     }
 
     renderSales();
