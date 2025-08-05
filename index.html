@@ -1,19 +1,61 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
   <title>Stánek - Prodej</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
-    h1 { text-align: center; }
-    .item { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; }
-    .buttons { display: flex; gap: 5px; align-items: center; }
-    .buttons button { font-size: 1.5em; padding: 10px 15px; }
-    .total, .change { font-size: 1.2em; margin: 15px 0; }
-    input[type='number'] { padding: 5px; font-size: 1em; width: 100%; }
-    button { padding: 5px 10px; font-size: 1em; }
-    a { display: block; margin-top: 20px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+      font-size: 1.2em;
+      -webkit-tap-highlight-color: transparent;
+    }
+    h1 { text-align: center; font-size: 1.5em; }
+    .item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 15px 0;
+    }
+    .buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .buttons button {
+      font-size: 2em;
+      padding: 10px 18px;
+    }
+    .total, .change {
+      font-size: 1.4em;
+      margin: 20px 0;
+    }
+    input[type='number'], input[type='text'] {
+      padding: 10px;
+      font-size: 1.2em;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1.2em;
+      margin-top: 10px;
+      width: 100%;
+    }
+    a {
+      display: block;
+      margin-top: 30px;
+      text-align: center;
+      text-decoration: none;
+      font-size: 1.1em;
+      color: blue;
+    }
   </style>
 </head>
 <body>
@@ -24,16 +66,16 @@
   <div class="total">Celkem: <span id="total">0</span> Kč</div>
 
   <label>Zákazník platí:
-    <input type="tel" id="paid" inputmode="numeric" pattern="[0-9]*" oninput="updateChange()" />
+    <input type="number" id="paid" min="0" inputmode="numeric" pattern="[0-9]*" oninput="updateChange()">
   </label>
 
   <div class="change">Vrátit: <span id="change">0</span> Kč</div>
 
+  <button onclick="saveTransaction()">Uložit tržbu</button>
   <button onclick="resetAll()">Vymazat vše</button>
-  <button onclick="saveSale()">Uložit tržbu</button>
 
-  <a href="trzby.html">📊 Zobrazit tržby</a>
   <a href="admin.html">⚙️ Úprava nabídky</a>
+  <a href="trzby.html">📊 Zobrazit tržby</a>
 
   <script>
     let products = [];
@@ -109,19 +151,16 @@
       updateChange();
     }
 
-    function saveSale() {
+    function saveTransaction() {
       const total = Number(document.getElementById('total').innerText);
-      if (total > 0) {
-        const sales = JSON.parse(localStorage.getItem('sales') || '{}');
-        const today = new Date().toLocaleDateString('cs-CZ');
-        if (!sales[today]) sales[today] = [];
-        sales[today].push(total);
-        localStorage.setItem('sales', JSON.stringify(sales));
-        alert("Tržba byla uložena!");
-        resetAll();
-      } else {
-        alert("Žádná tržba k uložení.");
-      }
+      if (total === 0) return;
+      const date = new Date().toLocaleString('cs-CZ');
+      const stored = localStorage.getItem('trzby');
+      const records = stored ? JSON.parse(stored) : [];
+      records.push({ date, total });
+      localStorage.setItem('trzby', JSON.stringify(records));
+      resetAll();
+      alert('Tržba uložena.');
     }
 
     loadProducts();
