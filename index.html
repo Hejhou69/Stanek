@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stánek - Prodej</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
     h1 { text-align: center; }
-    .item { display: flex; justify-content: space-between; margin: 10px 0; }
-    .buttons { display: flex; gap: 5px; }
+    .item { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; }
+    .buttons { display: flex; gap: 5px; align-items: center; }
     .total, .change { font-size: 1.2em; margin: 15px 0; }
-    input[type='number'] { width: 100%; padding: 5px; font-size: 1em; }
+    input[type='number'], input[type='text'] { padding: 5px; font-size: 1em; }
     button { padding: 5px 10px; font-size: 1em; }
+    #admin-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc; }
   </style>
 </head>
 <body>
@@ -29,8 +30,19 @@
 
   <button onclick="resetAll()">Vymazat vše</button>
 
+  <div id="admin-section">
+    <h2>🛠️ Úprava zboží</h2>
+    <button onclick="toggleEditMode()">Změnit ceny</button>
+    <div id="edit-products" style="display:none; margin-top: 15px;"></div>
+
+    <h3>Přidat nový produkt</h3>
+    <input type="text" id="new-name" placeholder="Název">
+    <input type="number" id="new-price" placeholder="Cena" min="0">
+    <button onclick="addProduct()">Přidat</button>
+  </div>
+
   <script>
-    const products = [
+    let products = [
       { name: "Pivo", price: 35 },
       { name: "Kofola", price: 25 },
       { name: "Nealko pivo", price: 30 },
@@ -38,23 +50,28 @@
       { name: "Fruko", price: 15 }
     ];
 
-    const itemsDiv = document.getElementById('items');
+    let counts = [];
 
-    products.forEach((product, index) => {
-      const div = document.createElement('div');
-      div.className = 'item';
-      div.innerHTML = `
-        <span>${product.name} (${product.price} Kč)</span>
-        <div class="buttons">
-          <button onclick="decrease(${index})">-</button>
-          <span id="count-${index}">0</span>
-          <button onclick="increase(${index})">+</button>
-        </div>
-      `;
-      itemsDiv.appendChild(div);
-    });
-
-    let counts = Array(products.length).fill(0);
+    function renderItems() {
+      const itemsDiv = document.getElementById('items');
+      itemsDiv.innerHTML = '';
+      counts = Array(products.length).fill(0);
+      products.forEach((product, index) => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `
+          <span>${product.name} (<span id="price-${index}">${product.price}</span> Kč)</span>
+          <div class="buttons">
+            <button onclick="decrease(${index})">-</button>
+            <span id="count-${index}">0</span>
+            <button onclick="increase(${index})">+</button>
+          </div>
+        `;
+        itemsDiv.appendChild(div);
+      });
+      renderEditSection();
+      updateTotal();
+    }
 
     function increase(index) {
       counts[index]++;
@@ -90,6 +107,50 @@
       document.getElementById('paid').value = '';
       updateChange();
     }
+
+    function toggleEditMode() {
+      const section = document.getElementById('edit-products');
+      section.style.display = section.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function renderEditSection() {
+      const section = document.getElementById('edit-products');
+      section.innerHTML = '';
+      products.forEach((product, index) => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `
+          <input type="text" value="${product.name}" onchange="editName(${index}, this.value)">
+          <input type="number" value="${product.price}" min="0" onchange="editPrice(${index}, this.value)">
+        `;
+        section.appendChild(div);
+      });
+    }
+
+    function editName(index, value) {
+      products[index].name = value;
+      renderItems();
+    }
+
+    function editPrice(index, value) {
+      products[index].price = parseFloat(value);
+      renderItems();
+    }
+
+    function addProduct() {
+      const name = document.getElementById('new-name').value.trim();
+      const price = parseFloat(document.getElementById('new-price').value);
+      if (name && !isNaN(price) && price > 0) {
+        products.push({ name, price });
+        renderItems();
+        document.getElementById('new-name').value = '';
+        document.getElementById('new-price').value = '';
+      } else {
+        alert("Zadej platný název a cenu.");
+      }
+    }
+
+    renderItems();
   </script>
 </body>
 </html>
