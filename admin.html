@@ -24,7 +24,7 @@
   <div class="total">Celkem: <span id="total">0</span> Kč</div>
 
   <label>Zákazník platí:
-    <input type="number" id="paid" min="0" oninput="updateChange()">
+    <input type="text" id="paid" pattern="^(10|20|50|100|200|500|1000)$" oninput="updateChange()">
   </label>
 
   <div class="change">Vrátit: <span id="change">0</span> Kč</div>
@@ -49,6 +49,7 @@
           { name: "Křupky", price: 20 },
           { name: "Fruko", price: 15 }
         ];
+        localStorage.setItem('products', JSON.stringify(products));
       }
     }
 
