@@ -3,62 +3,63 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Úprava nabídky</title>
+  <title>Správa nabídky</title>
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
     h1 { text-align: center; }
-    .product { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-    .product input { padding: 5px; font-size: 1em; width: 100px; }
-    .product button { padding: 5px 10px; }
-    .actions { display: flex; gap: 5px; }
-    #addForm { margin-top: 20px; }
-    a { display: block; margin-top: 30px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
+    .product { display: flex; align-items: center; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
+    input[type='text'], input[type='number'] { padding: 5px; font-size: 1em; }
+    button { padding: 5px 10px; font-size: 1em; }
+    .controls { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
   </style>
 </head>
 <body>
-  <h1>Úprava nabídky</h1>
+  <h1>Správa nabídky</h1>
 
   <div id="productList"></div>
 
-  <form id="addForm" onsubmit="addProduct(event)">
-    <h3>Přidat nový produkt</h3>
-    <input type="text" id="newName" placeholder="Název" required>
-    <input type="number" id="newPrice" placeholder="Cena" min="0" required>
-    <button type="submit">Přidat</button>
-  </form>
-
-  <a href="index.html">⬅️ Zpět na prodej</a>
+  <div class="controls">
+    <button onclick="addProduct()">➕ Přidat položku</button>
+    <button onclick="saveProducts()">💾 Uložit změny</button>
+    <a href="index.html">↩️ Zpět na prodej</a>
+  </div>
 
   <script>
+    // Storage helpers
+    function gs(key) {
+      return localStorage.getItem('/Stanek_' + key);
+    }
+    function ss(key, value) {
+      localStorage.setItem('/Stanek_' + key, value);
+    }
+
     let products = [];
 
     function loadProducts() {
-      const stored = localStorage.getItem('products');
+      const stored = gs('products');
       if (stored) {
         products = JSON.parse(stored);
       } else {
-        products = [];
+        products = [
+          { name: "Pivo", price: 35 },
+          { name: "Kofola", price: 25 }
+        ];
       }
     }
 
-    function saveProducts() {
-      localStorage.setItem('products', JSON.stringify(products));
-    }
-
-    function renderList() {
+    function renderProducts() {
       const list = document.getElementById('productList');
       list.innerHTML = '';
+
       products.forEach((product, index) => {
         const div = document.createElement('div');
         div.className = 'product';
         div.innerHTML = `
           <input type="text" value="${product.name}" onchange="updateName(${index}, this.value)">
           <input type="number" value="${product.price}" onchange="updatePrice(${index}, this.value)">
-          <div class="actions">
-            <button onclick="moveUp(${index})">🔼</button>
-            <button onclick="moveDown(${index})">🔽</button>
-            <button onclick="removeProduct(${index})">🗑️</button>
-          </div>
+          <button onclick="moveUp(${index})">⬆️</button>
+          <button onclick="moveDown(${index})">⬇️</button>
+          <button onclick="removeProduct(${index})">🗑️</button>
         `;
         list.appendChild(div);
       });
@@ -66,46 +67,46 @@
 
     function updateName(index, value) {
       products[index].name = value;
-      saveProducts();
     }
 
     function updatePrice(index, value) {
-      products[index].price = Number(value);
-      saveProducts();
+      products[index].price = parseInt(value) || 0;
     }
 
-    function addProduct(e) {
-      e.preventDefault();
-      const name = document.getElementById('newName').value;
-      const price = Number(document.getElementById('newPrice').value);
-      products.push({ name, price });
-      saveProducts();
-      renderList();
-      e.target.reset();
+    function addProduct() {
+      products.push({ name: "Nová položka", price: 0 });
+      renderProducts();
     }
 
     function removeProduct(index) {
-      products.splice(index, 1);
-      saveProducts();
-      renderList();
+      if (confirm('Opravdu smazat tuto položku?')) {
+        products.splice(index, 1);
+        renderProducts();
+      }
     }
 
     function moveUp(index) {
-      if (index === 0) return;
-      [products[index - 1], products[index]] = [products[index], products[index - 1]];
-      saveProducts();
-      renderList();
+      if (index > 0) {
+        [products[index - 1], products[index]] = [products[index], products[index - 1]];
+        renderProducts();
+      }
     }
 
     function moveDown(index) {
-      if (index === products.length - 1) return;
-      [products[index + 1], products[index]] = [products[index], products[index + 1]];
-      saveProducts();
-      renderList();
+      if (index < products.length - 1) {
+        [products[index + 1], products[index]] = [products[index], products[index + 1]];
+        renderProducts();
+      }
+    }
+
+    function saveProducts() {
+      ss('products', JSON.stringify(products));
+      alert("Produkty byly uloženy.");
+      window.location.href = "index.html";
     }
 
     loadProducts();
-    renderList();
+    renderProducts();
   </script>
 </body>
 </html>
