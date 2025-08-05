@@ -1,11 +1,11 @@
 {
-  "name": "Stánek Prodej",
-  "short_name": "Prodej",
-  "description": "Prodejní aplikace pro stánek",
+  "name": "Stánek - Prodej",
+  "short_name": "Stánek",
+  "description": "Aplikace pro prodej v stánku",
   "start_url": "/index.html",
-  "display": "standalone",
+  "display": "standalone", 
   "background_color": "#ffffff",
-  "theme_color": "#4CAF50",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "/icon-192x192.png",
