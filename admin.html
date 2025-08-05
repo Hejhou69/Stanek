@@ -22,6 +22,11 @@
   <div id="items"></div>
 
   <button class="save-button" onclick="saveProducts()">Uložit změny</button>
+  <button class="save-button" onclick="addNewProduct()">Přidat produkt</button>
+  <button class="save-button" onclick="deleteProduct()">Smazat produkt</button>
+
+  <br>
+  <a href="index.html">← Návrat na hlavní stránku</a>
 
   <script>
     let products = [];
@@ -66,18 +71,25 @@
       alert('Změny byly uloženy!');
     }
 
+    function addNewProduct() {
+      const name = prompt("Zadejte název nového produktu:");
+      const price = prompt("Zadejte cenu nového produktu:");
+      if (name && price) {
+        products.push({ name, price: parseFloat(price) });
+        localStorage.setItem('products', JSON.stringify(products));
+        renderItems();
+      }
+    }
+
+    function deleteProduct() {
+      const name = prompt("Zadejte název produktu, který chcete smazat:");
+      products = products.filter(product => product.name !== name);
+      localStorage.setItem('products', JSON.stringify(products));
+      renderItems();
+    }
+
     loadProducts();
     renderItems();
-  </script>
-  
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js').then((registration) => {
-        console.log('Service Worker registered with scope:', registration.scope);
-      }).catch((error) => {
-        console.log('Service Worker registration failed:', error);
-      });
-    }
   </script>
 </body>
 </html>
