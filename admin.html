@@ -2,26 +2,25 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Stánek - Admin</title>
-  <link rel="manifest" href="/manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Úprava nabídky</title>
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
     h1 { text-align: center; }
-    .item { display: flex; justify-content: space-between; margin: 10px 0; }
-    .item input { font-size: 1.2em; padding: 5px; }
-    .buttons { display: flex; gap: 5px; }
-    button { font-size: 1em; padding: 10px; }
+    .item { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; }
+    .buttons { display: flex; gap: 5px; align-items: center; }
+    input[type="text"], input[type="number"] { padding: 5px; font-size: 1em; width: 80%; }
+    button { padding: 5px 10px; font-size: 1em; }
+    a { display: block; margin-top: 30px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
   </style>
 </head>
 <body>
-  <h1>Úprava nabídky</h1>
+  <h1>Admin - Úprava nabídky</h1>
 
-  <div id="product-list"></div>
+  <div id="items"></div>
 
   <button onclick="saveChanges()">Uložit změny</button>
-
-  <a href="index.html">Zpět na prodej</a>
+  <a href="index.html">← zpět</a>
 
   <script>
     let products = [];
@@ -41,31 +40,32 @@
       }
     }
 
-    function renderProductList() {
-      const productListDiv = document.getElementById('product-list');
-      productListDiv.innerHTML = '';
+    function renderItems() {
+      const itemsDiv = document.getElementById('items');
+      itemsDiv.innerHTML = '';
       products.forEach((product, index) => {
         const div = document.createElement('div');
         div.className = 'item';
         div.innerHTML = `
-          <input type="text" id="name-${index}" value="${product.name}" placeholder="Název">
-          <input type="number" id="price-${index}" value="${product.price}" placeholder="Cena">
+          <input type="text" value="${product.name}" id="name-${index}">
+          <input type="number" value="${product.price}" id="price-${index}">
         `;
-        productListDiv.appendChild(div);
+        itemsDiv.appendChild(div);
       });
     }
 
     function saveChanges() {
-      products.forEach((product, index) => {
-        product.name = document.getElementById(`name-${index}`).value;
-        product.price = Number(document.getElementById(`price-${index}`).value);
+      products = products.map((product, index) => {
+        return {
+          name: document.getElementById(`name-${index}`).value,
+          price: Number(document.getElementById(`price-${index}`).value)
+        };
       });
       localStorage.setItem('products', JSON.stringify(products));
-      alert('Nabídka byla úspěšně uložena!');
     }
 
     loadProducts();
-    renderProductList();
+    renderItems();
   </script>
 </body>
 </html>
