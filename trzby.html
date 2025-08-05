@@ -5,46 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Historie Tržeb</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; box-sizing: border-box; }
+    body { font-family: sans-serif; max-width: 800px; margin: auto; }
     h1 { text-align: center; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 8px; text-align: left; border: 1px solid #ddd; }
+    th, td { padding: 8px 12px; border: 1px solid #ddd; text-align: center; }
     .total { font-size: 1.2em; margin-top: 20px; }
-    .total span { font-weight: bold; }
   </style>
 </head>
 <body>
   <h1>Historie Tržeb</h1>
+  
   <table>
     <thead>
       <tr>
         <th>Datum</th>
-        <th>Celková tržba (Kč)</th>
-        <th>Počet prodaných kusů</th>
-        <th>Vrátit (Kč)</th>
+        <th>Celková tržba</th>
+        <th>Počet kusů</th>
+        <th>Vráceno</th>
       </tr>
     </thead>
-    <tbody id="sales-history">
+    <tbody id="sales-table">
+      <!-- Zde se načtou záznamy tržeb -->
     </tbody>
   </table>
 
   <div class="total">
-    <span>Součet všech prodaných kusů: <span id="total-items">0</span></span><br>
-    <span>Celková tržba: <span id="total-revenue">0</span> Kč</span>
+    Celková tržba: <span id="total-revenue">0</span> Kč<br>
+    Celkový počet prodaných kusů: <span id="total-items">0</span>
   </div>
-
-  <a href="index.html">🔙 Zpět na prodej</a>
 
   <script>
     function loadSales() {
-      const salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
-      const salesTable = document.getElementById('sales-history');
+      const sales = JSON.parse(localStorage.getItem('sales')) || [];
+      const salesTable = document.getElementById('sales-table');
       let totalRevenue = 0;
       let totalItems = 0;
 
-      salesTable.innerHTML = ''; // Clear previous entries
-
-      salesHistory.forEach(sale => {
+      sales.forEach(sale => {
         const row = document.createElement('tr');
         const soldItemsCount = sale.soldItems.reduce((sum, count) => sum + count, 0);
         row.innerHTML = `
