@@ -10,12 +10,10 @@
     .item { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; }
     .buttons { display: flex; gap: 5px; align-items: center; }
     .buttons button { font-size: 2em; padding: 15px 20px; }
-    .total, .change { font-size: 1.2em; margin: 15px 0; }
-    .banknotes { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
-    .banknotes button { padding: 10px 15px; font-size: 1.1em; }
-    input[type='tel'] { padding: 5px; font-size: 1em; width: 100%; }
-    button { font-size: 1em; }
-    a { display: block; margin-top: 30px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
+    .total, .change { font-size: 1.3em; margin: 15px 0; }
+    input[type='number'], input[type='text'] { padding: 10px; font-size: 1em; width: 100%; }
+    button { padding: 10px 15px; font-size: 1em; margin: 5px 0; width: 100%; }
+    a { display: block; margin-top: 20px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
   </style>
 </head>
 <body>
@@ -26,24 +24,16 @@
   <div class="total">Celkem: <span id="total">0</span> Kč</div>
 
   <label>Zákazník platí:
-    <input type="tel" inputmode="numeric" pattern="[0-9]*" id="paid" oninput="updateChange()">
+    <input type="tel" inputmode="numeric" id="paid" oninput="updateChange()">
   </label>
-
-  <div class="banknotes">
-    <button onclick="addCash(10)">+10 Kč</button>
-    <button onclick="addCash(20)">+20 Kč</button>
-    <button onclick="addCash(50)">+50 Kč</button>
-    <button onclick="addCash(100)">+100 Kč</button>
-    <button onclick="addCash(200)">+200 Kč</button>
-    <button onclick="addCash(500)">+500 Kč</button>
-    <button onclick="addCash(1000)">+1000 Kč</button>
-  </div>
 
   <div class="change">Vrátit: <span id="change">0</span> Kč</div>
 
-  <button onclick="resetAll()">Vymazat vše</button>
+  <button onclick="saveSale()">💾 Uložit</button>
+  <button onclick="resetAll()">🧹 Vymazat vše</button>
 
   <a href="admin.html">⚙️ Úprava nabídky</a>
+  <a href="trzby.html">📈 Přehled tržeb</a>
 
   <script>
     let products = [];
@@ -74,7 +64,7 @@
         div.innerHTML = `
           <span>${product.name} (<span id="price-${index}">${product.price}</span> Kč)</span>
           <div class="buttons">
-            <button onclick="decrease(${index})">−</button>
+            <button onclick="decrease(${index})">-</button>
             <span id="count-${index}">0</span>
             <button onclick="increase(${index})">+</button>
           </div>
@@ -112,18 +102,30 @@
       document.getElementById('change').innerText = change >= 0 ? change : 0;
     }
 
-    function addCash(amount) {
-      const input = document.getElementById('paid');
-      let current = Number(input.value) || 0;
-      input.value = current + amount;
-      updateChange();
-    }
-
     function resetAll() {
       counts = counts.map(() => 0);
       products.forEach((_, i) => updateDisplay(i));
       document.getElementById('paid').value = '';
       updateChange();
+    }
+
+    function saveSale() {
+      const total = counts.reduce((sum, count, i) => sum + count * products[i].price, 0);
+      if (total === 0) return;
+
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      const stored = localStorage.getItem('sales') || '{}';
+      const sales = JSON.parse(stored);
+
+      if (!sales[today]) {
+        sales[today] = [];
+      }
+
+      sales[today].push(total);
+      localStorage.setItem('sales', JSON.stringify(sales));
+
+      resetAll();
+      alert("Prodej byl uložen.");
     }
 
     loadProducts();
