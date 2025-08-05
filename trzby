@@ -3,71 +3,106 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stánek - Tržby</title>
+  <title>Přehled tržeb</title>
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
     h1 { text-align: center; }
-    .day { margin: 15px 0; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
-    .day h3 { margin: 0 0 10px 0; }
-    ul { list-style: none; padding-left: 0; }
-    li { margin-bottom: 5px; }
-    .total { font-weight: bold; margin-top: 10px; }
-    button { margin-top: 10px; padding: 5px 10px; font-size: 0.9em; }
-    a { display: block; margin-top: 30px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    table, th, td { border: 1px solid #ddd; }
+    th, td { padding: 10px; text-align: center; }
+    th { background-color: #f2f2f2; }
+    button { padding: 10px 15px; font-size: 1em; }
+    .controls { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
   </style>
 </head>
 <body>
-  <h1>📈 Přehled tržeb</h1>
-  <div id="sales-container"></div>
-  <a href="index.html">← Zpět na prodej</a>
+  <h1>Přehled tržeb</h1>
+
+  <table id="salesTable">
+    <thead>
+      <tr>
+        <th>Datum</th>
+        <th>Tržba (Kč)</th>
+        <th>Akce</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Tržby se zde dynamicky načítají -->
+    </tbody>
+  </table>
+
+  <div class="controls">
+    <button onclick="resetAllSales()">🧹 Vymazat tržby</button>
+    <button onclick="exportCSV()">📄 Export do CSV</button>
+    <a href="index.html">↩️ Zpět na prodej</a>
+  </div>
 
   <script>
-    function renderSales() {
-      const container = document.getElementById('sales-container');
-      container.innerHTML = '';
-
-      const stored = localStorage.getItem('sales');
-      if (!stored) {
-        container.innerHTML = '<p>Žádné tržby zatím nejsou uloženy.</p>';
-        return;
-      }
-
-      const sales = JSON.parse(stored);
-      const days = Object.keys(sales).sort().reverse(); // Nejnovější první
-
-      if (days.length === 0) {
-        container.innerHTML = '<p>Žádné tržby zatím nejsou uloženy.</p>';
-        return;
-      }
-
-      days.forEach(day => {
-        const dayDiv = document.createElement('div');
-        dayDiv.className = 'day';
-
-        const amounts = sales[day];
-        const sum = amounts.reduce((a, b) => a + b, 0);
-
-        dayDiv.innerHTML = `
-          <h3>${day}</h3>
-          <ul>
-            ${amounts.map(a => `<li>${a} Kč</li>`).join('')}
-          </ul>
-          <div class="total">Součet: ${sum} Kč</div>
-          <button onclick="deleteDay('${day}')">🗑️ Smazat den</button>
-        `;
-
-        container.appendChild(dayDiv);
-      });
+    // Storage helpers
+    function gs(key) {
+      return localStorage.getItem('/Stanek_' + key);
+    }
+    function ss(key, value) {
+      localStorage.setItem('/Stanek_' + key, value);
     }
 
-    function deleteDay(day) {
-      if (!confirm(`Opravdu chceš smazat tržby za ${day}?`)) return;
-      const stored = localStorage.getItem('sales');
-      if (!stored) return;
-      const sales = JSON.parse(stored);
-      delete sales[day];
-      localStorage.setItem('sales', JSON.stringify(sales));
+    function loadSales() {
+      const sales = gs('sales');
+      return sales ? JSON.parse(sales) : {};
+    }
+
+    function renderSales() {
+      const sales = loadSales();
+      const tbody = document.getElementById('salesTable').getElementsByTagName('tbody')[0];
+      tbody.innerHTML = '';
+
+      for (let date in sales) {
+        sales[date].forEach(sale => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${date}</td>
+            <td>${sale} Kč</td>
+            <td><button onclick="deleteSale('${date}', ${sale})">🗑️ Smazat</button></td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+    }
+
+    function resetAllSales() {
+      if (confirm('Opravdu chcete vymazat všechny tržby?')) {
+        ss('sales', JSON.stringify({}));
+        renderSales();
+      }
+    }
+
+    function deleteSale(date, sale) {
+      const sales = loadSales();
+      const updatedSales = sales[date].filter(s => s !== sale);
+      if (updatedSales.length === 0) {
+        delete sales[date];
+      } else {
+        sales[date] = updatedSales;
+      }
+      ss('sales', JSON.stringify(sales));
       renderSales();
+    }
+
+    function exportCSV() {
+      const sales = loadSales();
+      let csvContent = "Datum,Tržba (Kč)\n";
+      
+      for (let date in sales) {
+        sales[date].forEach(sale => {
+          csvContent += `${date},${sale}\n`;
+        });
+      }
+      
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'trzby.csv';
+      link.click();
     }
 
     renderSales();
