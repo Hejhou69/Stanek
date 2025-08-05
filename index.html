@@ -27,11 +27,12 @@
   <div class="total">Celkem: <span id="total">0</span> Kč</div>
 
   <label>Zákazník platí:
-    <input type="number" id="paid" min="0" oninput="updateChange()">
+    <input type="number" id="paid" min="0" oninput="updateChange()" inputmode="numeric">
   </label>
 
   <div class="change">Vrátit: <span id="change">0</span> Kč</div>
 
+  <button onclick="saveSale()">Uložit tržbu</button>
   <button onclick="resetAll()">Vymazat vše</button>
 
   <a href="admin.html">⚙️ Úprava nabídky</a>
@@ -111,10 +112,6 @@
       updateChange();
     }
 
-    loadProducts();
-    renderItems();
-
-    // Uložení tržby
     function saveSale() {
       const saleData = {
         date: new Date().toISOString().split('T')[0],
@@ -124,10 +121,24 @@
       const history = JSON.parse(localStorage.getItem('salesHistory')) || [];
       history.push(saleData);
       localStorage.setItem('salesHistory', JSON.stringify(history));
+
+      // Reset after saving the sale
+      resetAll();
+      alert('Tržba byla uložena!');
     }
 
-    // Při ukládání tržby
-    document.querySelector('button').addEventListener('click', saveSale);
+    loadProducts();
+    renderItems();
+  </script>
+  
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js').then((registration) => {
+        console.log('Service Worker registered with scope:', registration.scope);
+      }).catch((error) => {
+        console.log('Service Worker registration failed:', error);
+      });
+    }
   </script>
 </body>
 </html>
