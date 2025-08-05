@@ -1,30 +1,27 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Správa nabídky</title>
+  <title>Stánek - Admin</title>
+  <link rel="manifest" href="/manifest.json">
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
     h1 { text-align: center; }
-    .item { display: flex; align-items: center; justify-content: space-between; margin: 10px 0; }
-    .item input { margin: 0 5px; }
+    .item { display: flex; justify-content: space-between; margin: 10px 0; }
+    .item input { font-size: 1.2em; padding: 5px; }
     .buttons { display: flex; gap: 5px; }
-    button { padding: 5px 10px; font-size: 1em; }
-    a { display: block; margin-top: 30px; text-align: center; font-size: 1em; color: blue; text-decoration: none; }
+    button { font-size: 1em; padding: 10px; }
   </style>
 </head>
 <body>
-  <h1>Správa nabídky</h1>
+  <h1>Úprava nabídky</h1>
 
-  <div id="products"></div>
+  <div id="product-list"></div>
 
-  <h3>Přidat nový produkt</h3>
-  <input type="text" id="newName" placeholder="Název" />
-  <input type="number" id="newPrice" placeholder="Cena" />
-  <button onclick="addProduct()">Přidat</button>
+  <button onclick="saveChanges()">Uložit změny</button>
 
-  <a href="index.html">← Zpět na prodej</a>
+  <a href="index.html">Zpět na prodej</a>
 
   <script>
     let products = [];
@@ -41,76 +38,34 @@
           { name: "Křupky", price: 20 },
           { name: "Fruko", price: 15 }
         ];
-        localStorage.setItem('products', JSON.stringify(products));
       }
     }
 
-    function saveProducts() {
-      localStorage.setItem('products', JSON.stringify(products));
-      renderProducts();
-    }
-
-    function renderProducts() {
-      const container = document.getElementById('products');
-      container.innerHTML = '';
+    function renderProductList() {
+      const productListDiv = document.getElementById('product-list');
+      productListDiv.innerHTML = '';
       products.forEach((product, index) => {
         const div = document.createElement('div');
         div.className = 'item';
         div.innerHTML = `
-          <input type="text" value="${product.name}" onchange="updateName(${index}, this.value)" />
-          <input type="number" value="${product.price}" onchange="updatePrice(${index}, this.value)" />
-          <div class="buttons">
-            <button onclick="moveUp(${index})">🔼</button>
-            <button onclick="moveDown(${index})">🔽</button>
-            <button onclick="removeProduct(${index})">🗑️</button>
-          </div>
+          <input type="text" id="name-${index}" value="${product.name}" placeholder="Název">
+          <input type="number" id="price-${index}" value="${product.price}" placeholder="Cena">
         `;
-        container.appendChild(div);
+        productListDiv.appendChild(div);
       });
     }
 
-    function updateName(index, value) {
-      products[index].name = value;
-      saveProducts();
-    }
-
-    function updatePrice(index, value) {
-      products[index].price = Number(value);
-      saveProducts();
-    }
-
-    function addProduct() {
-      const name = document.getElementById('newName').value.trim();
-      const price = Number(document.getElementById('newPrice').value);
-      if (name && price > 0) {
-        products.push({ name, price });
-        document.getElementById('newName').value = '';
-        document.getElementById('newPrice').value = '';
-        saveProducts();
-      }
-    }
-
-    function removeProduct(index) {
-      products.splice(index, 1);
-      saveProducts();
-    }
-
-    function moveUp(index) {
-      if (index > 0) {
-        [products[index - 1], products[index]] = [products[index], products[index - 1]];
-        saveProducts();
-      }
-    }
-
-    function moveDown(index) {
-      if (index < products.length - 1) {
-        [products[index + 1], products[index]] = [products[index], products[index + 1]];
-        saveProducts();
-      }
+    function saveChanges() {
+      products.forEach((product, index) => {
+        product.name = document.getElementById(`name-${index}`).value;
+        product.price = Number(document.getElementById(`price-${index}`).value);
+      });
+      localStorage.setItem('products', JSON.stringify(products));
+      alert('Nabídka byla úspěšně uložena!');
     }
 
     loadProducts();
-    renderProducts();
+    renderProductList();
   </script>
 </body>
 </html>
