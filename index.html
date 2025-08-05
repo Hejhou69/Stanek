@@ -10,9 +10,9 @@
     .item { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; }
     .buttons { display: flex; gap: 5px; align-items: center; }
     .total, .change { font-size: 1.2em; margin: 15px 0; }
-    input[type='number'], input[type='text'] { padding: 5px; font-size: 1em; }
+    input[type='number'] { padding: 5px; font-size: 1em; }
     button { padding: 5px 10px; font-size: 1em; }
-    #admin-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc; }
+    a { display: block; margin-top: 30px; text-align: center; text-decoration: none; font-size: 1em; color: blue; }
   </style>
 </head>
 <body>
@@ -30,16 +30,7 @@
 
   <button onclick="resetAll()">Vymazat vše</button>
 
-  <div id="admin-section">
-    <h2>🛠️ Úprava zboží</h2>
-    <button onclick="toggleEditMode()">Změnit ceny</button>
-    <div id="edit-products" style="display:none; margin-top: 15px;"></div>
-
-    <h3>Přidat nový produkt</h3>
-    <input type="text" id="new-name" placeholder="Název">
-    <input type="number" id="new-price" placeholder="Cena" min="0">
-    <button onclick="addProduct()">Přidat</button>
-  </div>
+  <a href="admin.html">🔧 Úprava nabídky</a>
 
   <script>
     let products = [
@@ -69,7 +60,6 @@
         `;
         itemsDiv.appendChild(div);
       });
-      renderEditSection();
       updateTotal();
     }
 
@@ -106,48 +96,6 @@
       products.forEach((_, i) => updateDisplay(i));
       document.getElementById('paid').value = '';
       updateChange();
-    }
-
-    function toggleEditMode() {
-      const section = document.getElementById('edit-products');
-      section.style.display = section.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function renderEditSection() {
-      const section = document.getElementById('edit-products');
-      section.innerHTML = '';
-      products.forEach((product, index) => {
-        const div = document.createElement('div');
-        div.className = 'item';
-        div.innerHTML = `
-          <input type="text" value="${product.name}" onchange="editName(${index}, this.value)">
-          <input type="number" value="${product.price}" min="0" onchange="editPrice(${index}, this.value)">
-        `;
-        section.appendChild(div);
-      });
-    }
-
-    function editName(index, value) {
-      products[index].name = value;
-      renderItems();
-    }
-
-    function editPrice(index, value) {
-      products[index].price = parseFloat(value);
-      renderItems();
-    }
-
-    function addProduct() {
-      const name = document.getElementById('new-name').value.trim();
-      const price = parseFloat(document.getElementById('new-price').value);
-      if (name && !isNaN(price) && price > 0) {
-        products.push({ name, price });
-        renderItems();
-        document.getElementById('new-name').value = '';
-        document.getElementById('new-price').value = '';
-      } else {
-        alert("Zadej platný název a cenu.");
-      }
     }
 
     renderItems();
